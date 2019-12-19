@@ -1,15 +1,7 @@
 public class DarkSkyCallout {
 
-    public Forecast forecast = new Forecast();
-    private Double latitude;
-    private Double longitude;
-    
-    public DarkSkyCallout(Double latitude, Double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public void performCallout() {
+    @AuraEnabled(cacheable=true)
+    public static Forecast performCallout(Double latitude, Double longitude) {
         Http http = new Http();
 
         HttpRequest request= new HttpRequest();
@@ -22,15 +14,12 @@ public class DarkSkyCallout {
         HttpResponse response = http.send(request);
         String responseBody = response.getBody();
 
-        parseResponse(responseBody);
+        return parseResponse(responseBody);
 
     }
 
-    public void parseResponse(String response) {
-        System.debug('before ' + response);
+    public static Forecast parseResponse(String response) {
         response = response.replace('"time":', '"time_x":');
-        System.debug('after ' + response);
-        this.forecast = (Forecast) System.JSON.deserialize(response, Forecast.class);
-
+        return (Forecast) System.JSON.deserialize(response, Forecast.class);
     }
 }
